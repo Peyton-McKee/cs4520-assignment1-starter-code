@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 
@@ -40,6 +41,8 @@ class LoginFragment: Fragment(), View.OnClickListener {
                     usernameTextField.text.clear()
                     passwordTextField.text.clear()
                     findNavController().navigate(R.id.action_loginFragment_to_productListFragment)
+                } else {
+                    Toast.makeText(requireContext().applicationContext, "Incorrect Username or Password", Toast.LENGTH_SHORT).show()
                 }
             }
         }
