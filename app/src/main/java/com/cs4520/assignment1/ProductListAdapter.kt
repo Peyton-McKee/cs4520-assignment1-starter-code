@@ -1,12 +1,16 @@
 package com.cs4520.assignment1
 
+import android.graphics.Color
+import android.opengl.Visibility
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ProductListAdapter(private val dataSet: Array<String>) :
+class ProductListAdapter(private val dataSet: Array<ProductItem>) :
     RecyclerView.Adapter<ProductListAdapter.ViewHolder>() {
 
     /**
@@ -14,11 +18,18 @@ class ProductListAdapter(private val dataSet: Array<String>) :
      * (custom ViewHolder)
      */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val textView: TextView
+        val nameTextView: TextView
+        val imageView: ImageView
+        val layout: LinearLayout
+        val dateTextView: TextView
+        val priceTextView: TextView
 
         init {
-            // Define click listener for the ViewHolder's View
-            textView = view.findViewById(R.id.textView)
+            nameTextView = view.findViewById(R.id.productTextView)
+            imageView = view.findViewById(R.id.productImageView)
+            layout = view.findViewById(R.id.productLayout)
+            dateTextView = view.findViewById(R.id.productDateTextView)
+            priceTextView = view.findViewById(R.id.productPriceTextView)
         }
     }
 
@@ -36,7 +47,22 @@ class ProductListAdapter(private val dataSet: Array<String>) :
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        viewHolder.textView.text = dataSet[position]
+        viewHolder.nameTextView.text = dataSet[position].name
+        viewHolder.priceTextView.text = ("$ " + dataSet[position].price.toString())
+        viewHolder.dateTextView.text = dataSet[position].expirationDate
+        if (dataSet[position].expirationDate == "") {
+            viewHolder.dateTextView.visibility = View.GONE
+        }
+        when (dataSet[position]) {
+            is ProductItem.Equipment -> {
+                viewHolder.layout.setBackgroundColor(Color.parseColor("#E06666"))
+                viewHolder.imageView.setImageResource(R.drawable.equipment)
+            }
+            is ProductItem.Food -> {
+                viewHolder.layout.setBackgroundColor(Color.parseColor("#FFD965"))
+                viewHolder.imageView.setImageResource(R.drawable.food)
+            }
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

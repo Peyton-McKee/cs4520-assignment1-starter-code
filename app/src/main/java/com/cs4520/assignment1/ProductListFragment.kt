@@ -26,7 +26,8 @@ class ProductListFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val dataset = arrayOf("January", "February", "March")
+        val dataset = arrayOf(ProductItem.Equipment("Treadmill", "", 32),
+            ProductItem.Food("Banana", "2024-02-29", 29), ProductItem.Equipment("Dumbbells", "", 45))
         val productListAdapter = ProductListAdapter(dataset);
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = productListAdapter
