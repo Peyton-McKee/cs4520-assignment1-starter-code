@@ -9,8 +9,14 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 
-class ProductListAdapter(private val dataSet: Array<ProductItem>) :
-    RecyclerView.Adapter<ProductListAdapter.ViewHolder>() {
+
+class ProductListAdapter(private var dataSet: MutableList<ProductItem>) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private val ITEM = 0
+    private val LOADING = 1
+    private var isLoadingAdded = false
+
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder)
@@ -31,39 +37,71 @@ class ProductListAdapter(private val dataSet: Array<ProductItem>) :
         }
     }
 
-    // Create new views (invoked by the layout manager)
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        // Create a new view, which defines the UI of the list item
-        val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.product, viewGroup, false)
+    class LoadingVH(itemView: View) : RecyclerView.ViewHolder(itemView) {}
 
-        return ViewHolder(view)
+
+    // Create new views (invoked by the layout manager)
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        // Create a new view, which defines the UI of the list item
+        var viewHolder: RecyclerView.ViewHolder? = null
+        val inflater = LayoutInflater.from(viewGroup.context)
+
+        when (viewType) {
+            ITEM -> viewHolder = ViewHolder(LayoutInflater.from(viewGroup.context)
+                .inflate(R.layout.product, viewGroup, false))
+            LOADING -> {
+                val v2: View = inflater.inflate(R.layout.product_progress, viewGroup, false)
+                viewHolder = LoadingVH(v2)
+            }
+        }
+
+        if (viewHolder == null) {
+            viewHolder = LoadingVH(LayoutInflater.from(viewGroup.context)
+                .inflate(R.layout.product_progress, viewGroup, false))
+        }
+
+        return viewHolder
+
     }
 
     // Replace the contents of a view (invoked by the layout manager)
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
 
-        // Get element from your dataset at this position and replace the
-        // contents of the view with that element
-        viewHolder.nameTextView.text = dataSet[position].name
-        viewHolder.priceTextView.text = ("""$ ${dataSet[position].price}""")
-        viewHolder.dateTextView.text = dataSet[position].expirationDate
-        if (dataSet[position].expirationDate == "") {
-            viewHolder.dateTextView.visibility = View.GONE
-        }
-        when (dataSet[position]) {
-            is ProductItem.Equipment -> {
-                viewHolder.layout.setBackgroundColor(Color.parseColor("#E06666"))
-                viewHolder.imageView.setImageResource(R.drawable.equipment)
+        when (viewHolder) {
+            is ViewHolder -> {
+                // Get element from your dataset at this position and replace the
+                // contents of the view with that element
+                viewHolder.nameTextView.text = dataSet[position].name
+                viewHolder.priceTextView.text = ("""$ ${dataSet[position].price}""")
+                viewHolder.dateTextView.text = dataSet[position].expirationDate
+                if (dataSet[position].expirationDate == "") {
+                    viewHolder.dateTextView.visibility = View.GONE
+                }
+                when (dataSet[position]) {
+                    is ProductItem.Equipment -> {
+                        viewHolder.layout.setBackgroundColor(Color.parseColor("#E06666"))
+                        viewHolder.imageView.setImageResource(R.drawable.equipment)
+                    }
+
+                    is ProductItem.Food -> {
+                        viewHolder.layout.setBackgroundColor(Color.parseColor("#FFD965"))
+                        viewHolder.imageView.setImageResource(R.drawable.food)
+                    }
+                }
             }
-            is ProductItem.Food -> {
-                viewHolder.layout.setBackgroundColor(Color.parseColor("#FFD965"))
-                viewHolder.imageView.setImageResource(R.drawable.food)
+            is LoadingVH -> {
+                // Do nothing
             }
         }
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = dataSet.size
 
+    override fun getItemViewType(position: Int): Int {
+        return if (position == dataSet.size - 1 && isLoadingAdded) LOADING else ITEM
+    }
+
+    fun updateData(newData: List<ProductItem>) {
+        dataSet.addAll(newData)
+    }
 }

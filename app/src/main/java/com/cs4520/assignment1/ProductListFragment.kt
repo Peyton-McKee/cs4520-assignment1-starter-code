@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
 class ProductListFragment : Fragment() {
     private lateinit var binding: ProductListBinding
     private lateinit var viewModel: ProductListViewModel
+    private lateinit var scrollListener : PaginationScrollListener
+    private val adapter = ProductListAdapter(mutableListOf())
 
     companion object {
         fun newInstance(): ProductListFragment {
@@ -38,6 +40,20 @@ class ProductListFragment : Fragment() {
 
         binding.apply {
             addViewModelObservers()
+            productList.adapter = adapter
+            scrollListener = object : PaginationScrollListener(productList.layoutManager as LinearLayoutManager) {
+                override fun loadMoreItems() {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        viewModel.loadProducts(requireContext())
+                    }
+                }
+
+                override val totalPageCount: Int
+                    get() = 10
+                override val isLoading: Boolean
+                    get() = viewModel.loadingLiveData.value ?: false
+            }
+            productList.addOnScrollListener(scrollListener)
         }
         return binding.root;
     }
@@ -59,7 +75,7 @@ class ProductListFragment : Fragment() {
                 binding.productListEmpty.visibility = View.VISIBLE
             } else {
                 binding.productListEmpty.visibility = View.GONE
-                val adapter = ProductListAdapter(it.toTypedArray())
+                adapter.updateData(it)
                 binding.productList.adapter = adapter
             }
         }

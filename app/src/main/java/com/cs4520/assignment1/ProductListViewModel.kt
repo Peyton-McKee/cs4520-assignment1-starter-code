@@ -12,6 +12,8 @@ import kotlinx.coroutines.withContext
 import java.lang.Exception
 
 class ProductListViewModel: ViewModel() {
+    private var pagesLoaded = 0
+
     val productsLiveData: MutableLiveData<List<ProductItem>> by lazy {
         MutableLiveData<List<ProductItem>>()
     }
@@ -34,12 +36,13 @@ class ProductListViewModel: ViewModel() {
 
             try {
                 val service = API.getInstance().create(ProductService::class.java)
-                val result = service.listProducts(null).execute().body()
+                val result = service.listProducts(pagesLoaded).execute().body()
+                pagesLoaded += 1
 
                 Log.d("ProductListViewModel", "result: $result")
 
                 if (result != null) {
-                    val products = mutableListOf<ProductItem>()
+                    val products = productsLiveData.value?.toMutableList() ?: mutableListOf()
                     result.forEach {
                         val productItem = it.toProductItem()
                         if (productItem != null && products.contains(productItem).not()) {
@@ -52,8 +55,6 @@ class ProductListViewModel: ViewModel() {
                     productsLiveData.postValue(products)
 
                     val productItemDao = db.productItemDao()
-
-                    productItemDao.deleteAllProductItems()
 
                     products.forEach {
                         productItemDao.insertProductItem(it.toProductItemRoom())
