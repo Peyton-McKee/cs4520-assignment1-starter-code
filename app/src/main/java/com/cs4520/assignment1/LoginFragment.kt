@@ -1,18 +1,19 @@
 package com.cs4520.assignment1
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.cs4520.assignment1.databinding.LoginBinding
 
 class LoginFragment: Fragment(), View.OnClickListener {
+    private lateinit var binding: LoginBinding
+
     companion object {
         fun newInstance(): LoginFragment {
             return LoginFragment();
@@ -22,14 +23,12 @@ class LoginFragment: Fragment(), View.OnClickListener {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.login, container, false)
+        binding = LoginBinding.inflate(inflater, container, false)
 
-        val signInButton = view.findViewById<Button>(R.id.signInButton)
+        val signInButton = binding.root.findViewById<Button>(R.id.signInButton)
         signInButton.setOnClickListener(this)
 
-
-
-        return view
+        return binding.root
     }
 
     override fun onClick(view: View?) {

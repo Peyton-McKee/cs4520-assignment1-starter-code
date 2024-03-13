@@ -1,18 +1,16 @@
 package com.cs4520.assignment1
 
 import android.graphics.Color
-import android.opengl.Visibility
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 
 class ProductListAdapter(private val dataSet: Array<ProductItem>) :
     RecyclerView.Adapter<ProductListAdapter.ViewHolder>() {
-
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder)
@@ -20,14 +18,14 @@ class ProductListAdapter(private val dataSet: Array<ProductItem>) :
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView
         val imageView: ImageView
-        val layout: LinearLayout
+        val layout: ConstraintLayout
         val dateTextView: TextView
         val priceTextView: TextView
 
         init {
             nameTextView = view.findViewById(R.id.productTextView)
             imageView = view.findViewById(R.id.productImageView)
-            layout = view.findViewById(R.id.productLayout)
+            layout = view.findViewById(R.id.productItemConstraintLayout)
             dateTextView = view.findViewById(R.id.productDateTextView)
             priceTextView = view.findViewById(R.id.productPriceTextView)
         }
@@ -48,7 +46,7 @@ class ProductListAdapter(private val dataSet: Array<ProductItem>) :
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         viewHolder.nameTextView.text = dataSet[position].name
-        viewHolder.priceTextView.text = ("$ " + dataSet[position].price.toString())
+        viewHolder.priceTextView.text = ("""$ ${dataSet[position].price}""")
         viewHolder.dateTextView.text = dataSet[position].expirationDate
         if (dataSet[position].expirationDate == "") {
             viewHolder.dateTextView.visibility = View.GONE
