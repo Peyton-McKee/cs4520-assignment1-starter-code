@@ -1,13 +1,10 @@
 package com.cs4520.assignment1
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.Exception
 
@@ -39,18 +36,14 @@ class ProductListViewModel: ViewModel() {
                 val result = service.listProducts(pagesLoaded).execute().body()
                 pagesLoaded += 1
 
-                Log.d("ProductListViewModel", "result: $result")
-
                 if (result != null) {
-                    val products = productsLiveData.value?.toMutableList() ?: mutableListOf()
+                    val products = mutableListOf<ProductItem>()
                     result.forEach {
                         val productItem = it.toProductItem()
                         if (productItem != null && products.contains(productItem).not()) {
                             products.add(productItem)
                         }
                     }
-
-                    Log.d("ProductListViewModel", "result: $products")
 
                     productsLiveData.postValue(products)
 
@@ -63,13 +56,13 @@ class ProductListViewModel: ViewModel() {
                     throw Exception("Failed to load products")
                 }
             } catch (e: Exception) {
-                val productItemDao = db.productItemDao()
-
-                val products = productItemDao.getAllProductItems().mapNotNull { it.toProductItem() }
-
                 errorLiveData.postValue(e)
 
-                productsLiveData.postValue(products)
+                if (productsLiveData.value.isNullOrEmpty()) {
+                    val productItemDao = db.productItemDao()
+                    val products = productItemDao.getAllProductItems().mapNotNull { it.toProductItem() }
+                    productsLiveData.postValue(products)
+                }
             } finally {
                 loadingLiveData.postValue(false)
             }

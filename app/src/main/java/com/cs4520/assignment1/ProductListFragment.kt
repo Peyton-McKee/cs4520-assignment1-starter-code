@@ -22,7 +22,7 @@ class ProductListFragment : Fragment() {
     private lateinit var binding: ProductListBinding
     private lateinit var viewModel: ProductListViewModel
     private lateinit var scrollListener : PaginationScrollListener
-    private val adapter = ProductListAdapter(mutableListOf())
+    private lateinit var adapter : ProductListAdapter
 
     companion object {
         fun newInstance(): ProductListFragment {
@@ -40,7 +40,7 @@ class ProductListFragment : Fragment() {
 
         binding.apply {
             addViewModelObservers()
-            productList.adapter = adapter
+            adapter = ProductListAdapter(mutableListOf(), productList)
             scrollListener = object : PaginationScrollListener(productList.layoutManager as LinearLayoutManager) {
                 override fun loadMoreItems() {
                     GlobalScope.launch(Dispatchers.IO) {
@@ -49,10 +49,11 @@ class ProductListFragment : Fragment() {
                 }
 
                 override val totalPageCount: Int
-                    get() = 10
+                    get() = adapter.dataSet.size
                 override val isLoading: Boolean
                     get() = viewModel.loadingLiveData.value ?: false
             }
+            productList.adapter = adapter
             productList.addOnScrollListener(scrollListener)
         }
         return binding.root;
@@ -71,7 +72,7 @@ class ProductListFragment : Fragment() {
     private fun ProductListBinding.addViewModelObservers() {
         viewModel.productsLiveData.observe(viewLifecycleOwner) {
             binding.productListProgressBar.visibility = ProgressBar.GONE
-            if (it.isEmpty()) {
+            if (it.isEmpty() && adapter.dataSet.isEmpty()) {
                 binding.productListEmpty.visibility = View.VISIBLE
             } else {
                 binding.productListEmpty.visibility = View.GONE
@@ -89,7 +90,6 @@ class ProductListFragment : Fragment() {
         }
 
         viewModel.errorLiveData.observe(viewLifecycleOwner) {
-            Log.d("ProductListFragment", "Error, ${it.toString()}")
             Toast.makeText(context, "Error, ${it.toString()}", Toast.LENGTH_SHORT).show()
             binding.productListEmpty.visibility = View.VISIBLE
         }

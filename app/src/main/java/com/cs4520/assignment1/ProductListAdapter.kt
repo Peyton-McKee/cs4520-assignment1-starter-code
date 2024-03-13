@@ -10,7 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 
 
-class ProductListAdapter(private var dataSet: MutableList<ProductItem>) :
+class ProductListAdapter(var dataSet: MutableList<ProductItem>, var recyclerView: RecyclerView) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val ITEM = 0
@@ -102,6 +102,9 @@ class ProductListAdapter(private var dataSet: MutableList<ProductItem>) :
     }
 
     fun updateData(newData: List<ProductItem>) {
+        val startPosition = dataSet.size // Store the starting position
         dataSet.addAll(newData)
+        notifyItemRangeInserted(startPosition, newData.size) // Notify adapter about the new items {
+        recyclerView.scrollToPosition(startPosition)
     }
 }
