@@ -34,9 +34,9 @@ class ProductListViewModel: ViewModel() {
             try {
                 val service = API.getInstance().create(ProductService::class.java)
                 val result = service.listProducts(pagesLoaded).execute().body()
-                pagesLoaded += 1
 
                 if (result != null) {
+                    pagesLoaded += 1
                     val products = mutableListOf<ProductItem>()
                     result.forEach {
                         val productItem = it.toProductItem()

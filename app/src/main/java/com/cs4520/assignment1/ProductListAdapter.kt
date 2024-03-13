@@ -1,6 +1,7 @@
 package com.cs4520.assignment1
 
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -103,8 +104,16 @@ class ProductListAdapter(var dataSet: MutableList<ProductItem>, var recyclerView
 
     fun updateData(newData: List<ProductItem>) {
         val startPosition = dataSet.size // Store the starting position
-        dataSet.addAll(newData)
-        notifyItemRangeInserted(startPosition, newData.size) // Notify adapter about the new items {
+        var itemsInserted = 0
+        newData.forEach {item ->
+            if (!dataSet.any { item.name == it.name }) {
+                dataSet.add(item)
+                itemsInserted++
+            }
+        }
+
+        Log.d("ProductListAdapter", "Inserted $itemsInserted items")
+        notifyItemRangeInserted(startPosition, itemsInserted) // Notify adapter about the new items {
         recyclerView.scrollToPosition(startPosition)
     }
 }
