@@ -77,7 +77,6 @@ class ProductListFragment : Fragment() {
             } else {
                 binding.productListEmpty.visibility = View.GONE
                 adapter.updateData(it)
-                binding.productList.adapter = adapter
             }
         }
 
@@ -91,7 +90,9 @@ class ProductListFragment : Fragment() {
 
         viewModel.errorLiveData.observe(viewLifecycleOwner) {
             Toast.makeText(context, "Error, ${it.toString()}", Toast.LENGTH_SHORT).show()
-            binding.productListEmpty.visibility = View.VISIBLE
+            if (adapter.dataSet.isEmpty()) {
+                binding.productListEmpty.visibility = View.VISIBLE
+            }
         }
     }
 }
