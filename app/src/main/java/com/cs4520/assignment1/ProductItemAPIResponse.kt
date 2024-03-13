@@ -1,6 +1,6 @@
 package com.cs4520.assignment1
 
-import android.util.Log
+import androidx.room.Entity
 
 data class ProductItemAPIResponse (
     val name: String?,

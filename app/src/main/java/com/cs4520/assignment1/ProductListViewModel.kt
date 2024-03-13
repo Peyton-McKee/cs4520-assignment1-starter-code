@@ -1,11 +1,14 @@
 package com.cs4520.assignment1
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.Exception
 
 class ProductListViewModel: ViewModel() {
@@ -20,10 +23,15 @@ class ProductListViewModel: ViewModel() {
         MutableLiveData<Boolean>()
     }
 
-    fun loadProducts() {
+    suspend fun loadProducts(context: Context) {
         loadingLiveData.postValue(true)
 
-        GlobalScope.launch {
+        withContext(Dispatchers.IO) {
+            val db = Room.databaseBuilder(
+                context,
+                Database::class.java, "my-database"
+            ).build()
+
             try {
                 val service = API.getInstance().create(ProductService::class.java)
                 val result = service.listProducts(null).execute().body()
@@ -34,7 +42,7 @@ class ProductListViewModel: ViewModel() {
                     val products = mutableListOf<ProductItem>()
                     result.forEach {
                         val productItem = it.toProductItem()
-                        if (productItem != null) {
+                        if (productItem != null && products.contains(productItem).not()) {
                             products.add(productItem)
                         }
                     }
@@ -42,11 +50,25 @@ class ProductListViewModel: ViewModel() {
                     Log.d("ProductListViewModel", "result: $products")
 
                     productsLiveData.postValue(products)
+
+                    val productItemDao = db.productItemDao()
+
+                    productItemDao.deleteAllProductItems()
+
+                    products.forEach {
+                        productItemDao.insertProductItem(it.toProductItemRoom())
+                    }
                 } else {
-                    errorLiveData.postValue(Exception("Failed to load products"))
+                    throw Exception("Failed to load products")
                 }
             } catch (e: Exception) {
+                val productItemDao = db.productItemDao()
+
+                val products = productItemDao.getAllProductItems().mapNotNull { it.toProductItem() }
+
                 errorLiveData.postValue(e)
+
+                productsLiveData.postValue(products)
             } finally {
                 loadingLiveData.postValue(false)
             }

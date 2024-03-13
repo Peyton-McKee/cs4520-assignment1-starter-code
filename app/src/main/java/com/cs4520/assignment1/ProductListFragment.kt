@@ -45,7 +45,11 @@ class ProductListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.loadProducts()
+        GlobalScope.launch {
+            if (context != null) {
+                viewModel.loadProducts(requireContext())
+            }
+        }
     }
 
     private fun ProductListBinding.addViewModelObservers() {
@@ -54,9 +58,9 @@ class ProductListFragment : Fragment() {
             if (it.isEmpty()) {
                 binding.productListEmpty.visibility = View.VISIBLE
             } else {
+                binding.productListEmpty.visibility = View.GONE
                 val adapter = ProductListAdapter(it.toTypedArray())
                 binding.productList.adapter = adapter
-                Log.d("ProductListFragment", "Product list: $it")
             }
         }
 
