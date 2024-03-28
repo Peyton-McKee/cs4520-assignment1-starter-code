@@ -1,6 +1,7 @@
 package com.cs4520.assignment1
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.room.Room
@@ -8,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.lang.Exception
 
-class ProductListViewModel: ViewModel() {
+class ProductListViewModel(private val database: Database) : ViewModel() {
     private var pagesLoaded = 0
 
     val productsLiveData: MutableLiveData<List<ProductItem>> by lazy {
@@ -22,19 +23,18 @@ class ProductListViewModel: ViewModel() {
         MutableLiveData<Boolean>()
     }
 
-    suspend fun loadProducts(context: Context) {
+    suspend fun loadProducts() {
+        Log.d("ProductListViewModel", "Loading products")
         loadingLiveData.postValue(true)
 
+        Log.d("ProductListViewModel", "Loading products")
+
+        val service = API.getInstance().create(ProductService::class.java)
         withContext(Dispatchers.IO) {
-            val db = Room.databaseBuilder(
-                context,
-                Database::class.java, "my-database"
-            ).build()
-
+            Log.d("ProductListViewModel", "Entering Context")
             try {
-                val service = API.getInstance().create(ProductService::class.java)
                 val result = service.listProducts(pagesLoaded).execute().body()
-
+                Log.d("ProductListViewModel", "Loaded products")
                 if (result != null) {
                     pagesLoaded += 1
                     val products = mutableListOf<ProductItem>()
@@ -47,7 +47,7 @@ class ProductListViewModel: ViewModel() {
 
                     productsLiveData.postValue(products)
 
-                    val productItemDao = db.productItemDao()
+                    val productItemDao = database.productItemDao()
 
                     products.forEach {
                         productItemDao.insertProductItem(it.toProductItemRoom())
@@ -56,11 +56,13 @@ class ProductListViewModel: ViewModel() {
                     throw Exception("Failed to load products")
                 }
             } catch (e: Exception) {
+                Log.d("ProductListViewModel", "Failed to load products", e)
                 errorLiveData.postValue(e)
 
                 if (productsLiveData.value.isNullOrEmpty()) {
-                    val productItemDao = db.productItemDao()
-                    val products = productItemDao.getAllProductItems().mapNotNull { it.toProductItem() }
+                    val productItemDao = database.productItemDao()
+                    val products =
+                        productItemDao.getAllProductItems().mapNotNull { it.toProductItem() }
                     productsLiveData.postValue(products)
                 }
             } finally {
