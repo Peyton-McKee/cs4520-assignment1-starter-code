@@ -1,7 +1,6 @@
 package com.cs4520.assignment1
 
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
 

@@ -1,7 +1,5 @@
 package com.cs4520.assignment1
 
-import androidx.room.Entity
-
 data class ProductItemAPIResponse (
     val name: String?,
     val expiryDate: String?,

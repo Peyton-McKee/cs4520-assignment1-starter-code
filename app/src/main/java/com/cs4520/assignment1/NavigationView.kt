@@ -18,10 +18,6 @@ fun NavigationView(database: Database) {
         composable("productList") {
             val viewModel = ProductListViewModel(database)
 
-            LaunchedEffect(viewModel) {
-                viewModel.loadProducts()
-            }
-
             ProductList(viewModel = viewModel)
         }
     }

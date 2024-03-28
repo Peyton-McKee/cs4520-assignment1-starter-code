@@ -10,7 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -18,9 +18,9 @@ import androidx.navigation.NavController
 
 @Composable
 fun LoginView(viewModel: LoginViewModel) {
-    val name = viewModel.nameLiveData.observeAsState()
-    val password = viewModel.passwordLiveData.observeAsState()
-    val error = viewModel.errorLiveData.observeAsState()
+    val name = viewModel.nameLiveData.collectAsState()
+    val password = viewModel.passwordLiveData.collectAsState()
+    val error = viewModel.errorLiveData.collectAsState()
 
     val context = LocalContext.current
 
@@ -29,10 +29,10 @@ fun LoginView(viewModel: LoginViewModel) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TextField(name.value!!,
+        TextField(name.value,
             onValueChange = viewModel.onNameChanged,
             label = { Text("Name") })
-        TextField(password.value!!,
+        TextField(password.value,
             onValueChange = viewModel.onPasswordChanged,
             label = { Text("Password") })
         Button(onClick = viewModel.onLoginClicked) {
